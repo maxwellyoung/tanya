@@ -68,7 +68,9 @@ export default function WorkSection() {
       id="work"
       className="h-screen w-full max-w-4xl p-6 md:p-12 lg:p-24 flex flex-col items-center"
     >
-      <h2 className="text-xl font-light md:text-2xl mb-4">Work Section</h2>
+      <h2 className="text-xl font-light md:text-2xl mb-4">
+        Here are some interiors I&apos;ve helped shine
+      </h2>
       <Separator className="mb-6" />
       <ScrollArea className="w-full">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
