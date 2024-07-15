@@ -126,7 +126,10 @@ export default function Home() {
             <br />
             <br />
             If you’re looking for colour consulting or interior design advice,{" "}
-            <span className="underline cursor-pointer">get in touch</span>!
+            <a className="underline cursor-pointer" href="#contact">
+              get in touch
+            </a>
+            !
           </p>
         </div>
       </div>
