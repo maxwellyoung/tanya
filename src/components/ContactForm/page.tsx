@@ -11,11 +11,11 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-  FormDescription,
-} from "../ui/form";
-import { Input } from "../ui/input";
-import { Textarea } from "../ui/textarea";
-import { Button } from "../ui/button";
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name is required" }),
@@ -35,27 +35,38 @@ export default function ContactForm() {
 
   const onSubmit = (data: FormData) => {
     console.log(data);
+    // Here you would typically send the data to your backend
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto">
-      <h2 className="text-xl font-light md:text-2xl mb-4">Contact Me</h2>
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8 }}
+      className="w-full max-w-2xl mx-auto p-6 md:p-12"
+    >
+      <h2 className="text-4xl md:text-5xl font-light mb-6 text-[#333333]">
+        Get in <span className="font-medium">Touch</span>
+      </h2>
+      <p className="text-xl font-light mb-8 text-[#666666]">
+        I&apos;d love to hear about your project. Let&apos;s create something
+        beautiful together.
+      </p>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel className="text-[#333333]">Name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Your name"
                     {...field}
-                    className="placeholder-gray-500 placeholder-opacity-75"
+                    className="bg-white border-[#FF3333] focus:border-[#FF6666] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6666] focus-visible:ring-offset-2"
                   />
                 </FormControl>
-                <FormDescription>This is your name.</FormDescription>
-                <FormMessage>{form.formState.errors.name?.message}</FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -63,19 +74,16 @@ export default function ContactForm() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel className="text-[#333333]">Email</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
                     placeholder="Your email"
                     {...field}
-                    className="placeholder-gray-500 placeholder-opacity-75"
+                    className="bg-white border-[#FF3333] focus:border-[#FF6666] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6666] focus-visible:ring-offset-2"
                   />
                 </FormControl>
-                <FormDescription>This is your email address.</FormDescription>
-                <FormMessage>
-                  {form.formState.errors.email?.message}
-                </FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -83,30 +91,27 @@ export default function ContactForm() {
             name="message"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Message</FormLabel>
+                <FormLabel className="text-[#333333]">Message</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Your message"
                     {...field}
-                    className="placeholder-gray-500 placeholder-opacity-75"
+                    className="bg-white border-[#FF3333] focus:border-[#FF6666] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6666] focus-visible:ring-offset-2"
                     rows={4}
                   />
                 </FormControl>
-                <FormDescription>Enter your message.</FormDescription>
-                <FormMessage>
-                  {form.formState.errors.message?.message}
-                </FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
           <Button
             type="submit"
-            className="w-full px-4 py-2 font-medium text-white bg-gray-700 rounded-md shadow hover:bg-gray-600 focus:outline-none focus:bg-gray-600"
+            className="w-full px-4 py-3 font-medium text-white bg-[#FF3333] rounded-full shadow hover:bg-[#FF6666] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6666] focus-visible:ring-offset-2 transition-colors duration-300"
           >
-            Send
+            Send Message
           </Button>
         </form>
       </Form>
-    </div>
+    </motion.div>
   );
 }
