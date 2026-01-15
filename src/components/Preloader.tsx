@@ -5,11 +5,16 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface PreloaderProps {
   onComplete?: () => void;
+  isMobile?: boolean;
 }
 
-export default function Preloader({ onComplete }: PreloaderProps) {
+export default function Preloader({ onComplete, isMobile = false }: PreloaderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState(0);
+
+  // Faster loading on mobile
+  const loadTime = isMobile ? 1200 : 2500;
+  const progressSpeed = isMobile ? 25 : 15;
 
   useEffect(() => {
     // Simulate loading progress
@@ -19,21 +24,21 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           clearInterval(interval);
           return 100;
         }
-        return prev + Math.random() * 15;
+        return prev + Math.random() * progressSpeed;
       });
-    }, 100);
+    }, 80);
 
     // Complete loading after animation
     const timeout = setTimeout(() => {
       setIsLoading(false);
       onComplete?.();
-    }, 2500);
+    }, loadTime);
 
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, [onComplete]);
+  }, [onComplete, loadTime, progressSpeed]);
 
   return (
     <AnimatePresence mode="wait">
@@ -43,52 +48,52 @@ export default function Preloader({ onComplete }: PreloaderProps) {
           initial={{ opacity: 1 }}
           exit={{
             opacity: 0,
-            transition: { duration: 0.8, ease: [0.76, 0, 0.24, 1] },
+            transition: { duration: isMobile ? 0.4 : 0.8, ease: [0.76, 0, 0.24, 1] },
           }}
         >
           {/* Animated circles */}
-          <div className="relative w-48 h-48 mb-12">
+          <div className="relative w-36 h-36 md:w-48 md:h-48 mb-8 md:mb-12">
             <motion.div
-              className="absolute w-24 h-24 rounded-full bg-[#FF3333]"
+              className="absolute w-16 h-16 md:w-24 md:h-24 rounded-full bg-[#FF3333]"
               style={{ mixBlendMode: "multiply" }}
               initial={{ x: 0, y: 0, scale: 0 }}
               animate={{
-                x: [-20, 20, -20],
-                y: [-10, 10, -10],
+                x: [-15, 15, -15],
+                y: [-8, 8, -8],
                 scale: 1,
               }}
               transition={{
-                scale: { duration: 0.5, ease: "easeOut" },
+                scale: { duration: 0.4, ease: "easeOut" },
                 x: { duration: 2, repeat: Infinity, ease: "easeInOut" },
                 y: { duration: 2.5, repeat: Infinity, ease: "easeInOut" },
               }}
             />
             <motion.div
-              className="absolute w-24 h-24 rounded-full bg-[#33CCFF]"
+              className="absolute w-16 h-16 md:w-24 md:h-24 rounded-full bg-[#33CCFF]"
               style={{ mixBlendMode: "multiply", left: "30%" }}
               initial={{ x: 0, y: 0, scale: 0 }}
               animate={{
-                x: [10, -15, 10],
-                y: [15, -5, 15],
+                x: [8, -12, 8],
+                y: [12, -4, 12],
                 scale: 1,
               }}
               transition={{
-                scale: { duration: 0.5, ease: "easeOut", delay: 0.1 },
+                scale: { duration: 0.4, ease: "easeOut", delay: 0.1 },
                 x: { duration: 2.2, repeat: Infinity, ease: "easeInOut" },
                 y: { duration: 1.8, repeat: Infinity, ease: "easeInOut" },
               }}
             />
             <motion.div
-              className="absolute w-24 h-24 rounded-full bg-[#FFCC33]"
+              className="absolute w-16 h-16 md:w-24 md:h-24 rounded-full bg-[#FFCC33]"
               style={{ mixBlendMode: "multiply", left: "15%", top: "30%" }}
               initial={{ x: 0, y: 0, scale: 0 }}
               animate={{
-                x: [-15, 25, -15],
-                y: [-20, 5, -20],
+                x: [-12, 20, -12],
+                y: [-15, 4, -15],
                 scale: 1,
               }}
               transition={{
-                scale: { duration: 0.5, ease: "easeOut", delay: 0.2 },
+                scale: { duration: 0.4, ease: "easeOut", delay: 0.2 },
                 x: { duration: 1.9, repeat: Infinity, ease: "easeInOut" },
                 y: { duration: 2.3, repeat: Infinity, ease: "easeInOut" },
               }}
@@ -97,12 +102,12 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
           {/* Brand text */}
           <motion.div
-            className="text-center"
-            initial={{ opacity: 0, y: 20 }}
+            className="text-center px-4"
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.6 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <h1 className="text-3xl md:text-4xl font-light text-[#333333] mb-2">
+            <h1 className="text-2xl md:text-4xl font-light text-[#333333] mb-2">
               Three Colours{" "}
               <span className="text-[#FF3333] font-medium">Red</span>
             </h1>
@@ -110,24 +115,24 @@ export default function Preloader({ onComplete }: PreloaderProps) {
 
           {/* Progress bar */}
           <motion.div
-            className="absolute bottom-20 left-1/2 -translate-x-1/2 w-48"
+            className="absolute bottom-16 md:bottom-20 left-1/2 -translate-x-1/2 w-40 md:w-48"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.3 }}
           >
             <div className="h-[2px] bg-[#333333]/10 rounded-full overflow-hidden">
               <motion.div
                 className="h-full bg-[#FF3333]"
                 initial={{ width: "0%" }}
                 animate={{ width: `${Math.min(progress, 100)}%` }}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.2 }}
               />
             </div>
             <motion.p
-              className="text-sm text-[#666666] text-center mt-4 font-light"
+              className="text-xs md:text-sm text-[#666666] text-center mt-3 md:mt-4 font-light"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.4 }}
             >
               {Math.min(Math.round(progress), 100)}%
             </motion.p>
