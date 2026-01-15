@@ -1,13 +1,24 @@
 "use client";
 
 import { ReactLenis } from "lenis/react";
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 
 interface SmoothScrollProps {
   children: ReactNode;
 }
 
 export default function SmoothScroll({ children }: SmoothScrollProps) {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Return children without Lenis wrapper during SSR
+  if (!isMounted) {
+    return <>{children}</>;
+  }
+
   return (
     <ReactLenis
       root

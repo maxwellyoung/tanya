@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Palette, RefreshCw, Copy, Check, Sparkles } from "lucide-react";
 import MagneticButton from "./MagneticButton";
@@ -51,36 +51,67 @@ function ColorSwatch({
   index,
   onCopy,
   copied,
+  isMobile,
 }: {
   color: string;
   index: number;
   onCopy: (color: string) => void;
   copied: boolean;
+  isMobile: boolean;
 }) {
+  const [showCopied, setShowCopied] = useState(false);
+
+  const handleClick = () => {
+    onCopy(color);
+    if (isMobile) {
+      setShowCopied(true);
+      setTimeout(() => setShowCopied(false), 1500);
+    }
+  };
+
   return (
     <motion.div
-      className="relative group cursor-pointer"
+      className="relative cursor-pointer select-none"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.5 }}
-      whileHover={{ scale: 1.05, y: -5 }}
-      onClick={() => onCopy(color)}
+      transition={{ delay: index * 0.08, duration: 0.4 }}
+      whileHover={isMobile ? {} : { scale: 1.05, y: -5 }}
+      whileTap={{ scale: 0.95 }}
+      onClick={handleClick}
     >
       <div
-        className="w-full aspect-square rounded-2xl shadow-lg transition-shadow duration-300 group-hover:shadow-xl"
+        className="w-full aspect-square rounded-xl md:rounded-2xl shadow-lg active:shadow-md transition-shadow duration-200"
         style={{ backgroundColor: color }}
       />
-      <motion.div
-        className="absolute inset-0 rounded-2xl bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        initial={false}
-      >
-        {copied ? (
+
+      {/* Desktop hover overlay */}
+      {!isMobile && (
+        <motion.div
+          className="absolute inset-0 rounded-xl md:rounded-2xl bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:opacity-100 transition-opacity duration-300"
+          initial={false}
+          whileHover={{ opacity: 1 }}
+        >
+          {copied ? (
+            <Check className="w-6 h-6 text-white" />
+          ) : (
+            <Copy className="w-5 h-5 text-white" />
+          )}
+        </motion.div>
+      )}
+
+      {/* Mobile tap feedback */}
+      {isMobile && showCopied && (
+        <motion.div
+          className="absolute inset-0 rounded-xl bg-black/60 flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
           <Check className="w-6 h-6 text-white" />
-        ) : (
-          <Copy className="w-5 h-5 text-white" />
-        )}
-      </motion.div>
-      <p className="text-center mt-3 text-sm font-mono text-[#666666] group-hover:text-[#333333] transition-colors">
+        </motion.div>
+      )}
+
+      <p className="text-center mt-2 md:mt-3 text-xs md:text-sm font-mono text-[#666666]">
         {color}
       </p>
     </motion.div>
@@ -92,6 +123,16 @@ export default function ColorLab() {
   const [copiedColor, setCopiedColor] = useState<string | null>(null);
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || !window.matchMedia("(pointer: fine)").matches);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleCopy = useCallback((color: string) => {
     navigator.clipboard.writeText(color);
@@ -105,12 +146,11 @@ export default function ColorLab() {
       const randomIndex = Math.floor(Math.random() * colorSchemes.length);
       setSelectedScheme(colorSchemes[randomIndex]);
       setIsGenerating(false);
-    }, 800);
+    }, 600);
   }, []);
 
   const filterByMood = useCallback((mood: string) => {
     setSelectedMood(mood === selectedMood ? null : mood);
-    // Simple mood mapping
     const moodMap: Record<string, number> = {
       Energetic: 0,
       Calm: 1,
@@ -124,69 +164,74 @@ export default function ColorLab() {
     }
   }, [selectedMood]);
 
+  // Wrapper for buttons - uses MagneticButton on desktop only
+  const ButtonWrapper = ({ children }: { children: React.ReactNode }) => {
+    if (isMobile) return <>{children}</>;
+    return <MagneticButton strength={0.15}>{children}</MagneticButton>;
+  };
+
   return (
-    <section className="w-full py-32 px-6 bg-white">
+    <section className="w-full py-20 md:py-32 px-4 md:px-6 bg-white">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <motion.div
-          className="text-center mb-16"
+          className="text-center mb-10 md:mb-16"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.6 }}
         >
           <motion.div
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#FFF5F5] rounded-full mb-6"
-            whileHover={{ scale: 1.05 }}
+            className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 bg-[#FFF5F5] rounded-full mb-4 md:mb-6"
+            whileTap={{ scale: 0.95 }}
           >
-            <Sparkles className="w-4 h-4 text-[#FF3333]" />
-            <span className="text-sm font-medium text-[#FF3333]">Interactive</span>
+            <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-[#FF3333]" />
+            <span className="text-xs md:text-sm font-medium text-[#FF3333]">Interactive</span>
           </motion.div>
 
-          <h2 className="text-5xl md:text-7xl font-light text-[#333333] leading-[1.1] mb-6">
+          <h2 className="text-4xl md:text-7xl font-light text-[#333333] leading-[1.1] mb-4 md:mb-6">
             Colour{" "}
             <span className="italic font-medium text-[#FF3333]">Lab</span>
           </h2>
-          <p className="text-lg text-[#666666] font-light max-w-2xl mx-auto">
-            Explore curated colour palettes for your space. Click any colour to copy
-            its hex code.
+          <p className="text-base md:text-lg text-[#666666] font-light max-w-2xl mx-auto px-4">
+            Explore curated colour palettes for your space. Tap any colour to copy its hex code.
           </p>
         </motion.div>
 
-        {/* Mood Filters */}
+        {/* Mood Filters - Scrollable on mobile */}
         <motion.div
-          className="flex flex-wrap justify-center gap-3 mb-12"
+          className="flex flex-nowrap md:flex-wrap justify-start md:justify-center gap-2 md:gap-3 mb-8 md:mb-12 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0 scrollbar-hide"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.2 }}
         >
           {moods.map((mood) => (
-            <MagneticButton key={mood} strength={0.15}>
+            <ButtonWrapper key={mood}>
               <button
                 onClick={() => filterByMood(mood)}
-                className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 ${
+                className={`flex-shrink-0 px-4 py-2 md:px-5 md:py-2.5 rounded-full text-xs md:text-sm font-medium transition-all duration-200 active:scale-95 ${
                   selectedMood === mood
                     ? "bg-[#FF3333] text-white"
-                    : "bg-[#FFF5F5] text-[#666666] hover:bg-[#FF3333]/10 hover:text-[#FF3333]"
+                    : "bg-[#FFF5F5] text-[#666666] active:bg-[#FF3333]/20"
                 }`}
               >
                 {mood}
               </button>
-            </MagneticButton>
+            </ButtonWrapper>
           ))}
         </motion.div>
 
         {/* Color Display */}
         <motion.div
-          className="bg-[#FFF5F5] rounded-3xl p-8 md:p-12"
+          className="bg-[#FFF5F5] rounded-2xl md:rounded-3xl p-5 md:p-12"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}
         >
           {/* Scheme Info */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 md:mb-10">
             <div>
               <AnimatePresence mode="wait">
                 <motion.h3
@@ -194,7 +239,7 @@ export default function ColorLab() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="text-2xl md:text-3xl font-medium text-[#333333] mb-2"
+                  className="text-xl md:text-3xl font-medium text-[#333333] mb-1 md:mb-2"
                 >
                   {selectedScheme.name}
                 </motion.h3>
@@ -205,32 +250,32 @@ export default function ColorLab() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="text-[#666666]"
+                  className="text-sm md:text-base text-[#666666]"
                 >
                   {selectedScheme.description}
                 </motion.p>
               </AnimatePresence>
             </div>
 
-            <MagneticButton strength={0.2}>
+            <ButtonWrapper>
               <button
                 onClick={generateRandomScheme}
                 disabled={isGenerating}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-white rounded-full shadow-sm hover:shadow-md transition-all duration-300 text-[#333333] font-medium disabled:opacity-70"
+                className="inline-flex items-center justify-center gap-2 px-5 py-2.5 md:px-6 md:py-3 bg-white rounded-full shadow-sm active:shadow-none active:scale-95 transition-all duration-200 text-[#333333] font-medium disabled:opacity-70 w-full md:w-auto"
               >
                 <motion.div
                   animate={isGenerating ? { rotate: 360 } : {}}
-                  transition={{ duration: 0.8, repeat: isGenerating ? Infinity : 0, ease: "linear" }}
+                  transition={{ duration: 0.6, repeat: isGenerating ? Infinity : 0, ease: "linear" }}
                 >
                   <RefreshCw className="w-4 h-4" />
                 </motion.div>
                 <span>Surprise Me</span>
               </button>
-            </MagneticButton>
+            </ButtonWrapper>
           </div>
 
           {/* Color Swatches */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
+          <div className="grid grid-cols-5 gap-2 md:gap-6">
             <AnimatePresence mode="wait">
               {selectedScheme.colors.map((color, index) => (
                 <ColorSwatch
@@ -239,6 +284,7 @@ export default function ColorLab() {
                   index={index}
                   onCopy={handleCopy}
                   copied={copiedColor === color}
+                  isMobile={isMobile}
                 />
               ))}
             </AnimatePresence>
@@ -246,10 +292,10 @@ export default function ColorLab() {
 
           {/* Preview Bar */}
           <motion.div
-            className="mt-10 h-16 rounded-2xl overflow-hidden flex shadow-inner"
+            className="mt-6 md:mt-10 h-10 md:h-16 rounded-xl md:rounded-2xl overflow-hidden flex shadow-inner"
             initial={{ opacity: 0, scaleX: 0 }}
             animate={{ opacity: 1, scaleX: 1 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
           >
             {selectedScheme.colors.map((color, index) => (
               <motion.div
@@ -258,7 +304,7 @@ export default function ColorLab() {
                 style={{ backgroundColor: color }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.6 + index * 0.1 }}
+                transition={{ delay: 0.5 + index * 0.08 }}
               />
             ))}
           </motion.div>
@@ -266,33 +312,33 @@ export default function ColorLab() {
 
         {/* Scheme Gallery */}
         <motion.div
-          className="mt-12"
+          className="mt-8 md:mt-12"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ delay: 0.4 }}
         >
-          <p className="text-sm text-[#666666] uppercase tracking-wider mb-6 text-center">
+          <p className="text-xs md:text-sm text-[#666666] uppercase tracking-wider mb-4 md:mb-6 text-center">
             All Palettes
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
             {colorSchemes.map((scheme) => (
               <motion.button
                 key={scheme.name}
                 onClick={() => setSelectedScheme(scheme)}
-                className={`p-3 rounded-xl transition-all duration-300 ${
+                className={`p-2.5 md:p-3 rounded-lg md:rounded-xl transition-all duration-200 active:scale-95 ${
                   selectedScheme.name === scheme.name
                     ? "bg-[#FF3333]/10 ring-2 ring-[#FF3333]"
-                    : "bg-white hover:bg-[#FFF5F5]"
+                    : "bg-white active:bg-[#FFF5F5]"
                 }`}
-                whileHover={{ y: -3 }}
+                whileHover={isMobile ? {} : { y: -3 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <div className="flex gap-1 mb-2">
+                <div className="flex gap-0.5 md:gap-1 mb-2">
                   {scheme.colors.slice(0, 5).map((color) => (
                     <div
                       key={color}
-                      className="flex-1 h-8 rounded-md"
+                      className="flex-1 h-6 md:h-8 rounded"
                       style={{ backgroundColor: color }}
                     />
                   ))}
@@ -307,24 +353,24 @@ export default function ColorLab() {
 
         {/* CTA */}
         <motion.div
-          className="text-center mt-16"
+          className="text-center mt-12 md:mt-16"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.5 }}
         >
-          <p className="text-[#666666] mb-6">
+          <p className="text-sm md:text-base text-[#666666] mb-4 md:mb-6">
             Want a custom colour palette for your space?
           </p>
-          <MagneticButton strength={0.2}>
+          <ButtonWrapper>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#333333] text-white rounded-full font-medium hover:bg-[#FF3333] transition-colors duration-300"
+              className="inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-[#333333] text-white rounded-full font-medium active:bg-[#FF3333] md:hover:bg-[#FF3333] transition-colors duration-200 active:scale-95"
             >
               <Palette className="w-4 h-4" />
               <span>Book a Consultation</span>
             </a>
-          </MagneticButton>
+          </ButtonWrapper>
         </motion.div>
       </div>
     </section>

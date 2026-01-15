@@ -13,6 +13,8 @@ export default function CustomCursor() {
     variant: "default",
   });
   const [isVisible, setIsVisible] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [hasFinPointer, setHasFinPointer] = useState(false);
   const cursorRef = useRef<HTMLDivElement>(null);
 
   const cursorX = useMotionValue(-100);
@@ -22,10 +24,14 @@ export default function CustomCursor() {
   const cursorXSpring = useSpring(cursorX, springConfig);
   const cursorYSpring = useSpring(cursorY, springConfig);
 
+  // Check for fine pointer on mount
   useEffect(() => {
-    // Check if device has fine pointer (mouse)
-    const hasFinPointer = window.matchMedia("(pointer: fine)").matches;
-    if (!hasFinPointer) return;
+    setIsMounted(true);
+    setHasFinPointer(window.matchMedia("(pointer: fine)").matches);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || !hasFinPointer) return;
 
     const moveCursor = (e: MouseEvent) => {
       cursorX.set(e.clientX);
@@ -94,7 +100,7 @@ export default function CustomCursor() {
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [cursorX, cursorY, cursorState.variant, isVisible]);
+  }, [cursorX, cursorY, cursorState.variant, isVisible, isMounted, hasFinPointer]);
 
   const variants = {
     default: {
@@ -129,8 +135,8 @@ export default function CustomCursor() {
     },
   };
 
-  // Don't render on touch devices
-  if (typeof window !== "undefined" && !window.matchMedia("(pointer: fine)").matches) {
+  // Don't render on touch devices or before mount
+  if (!isMounted || !hasFinPointer) {
     return null;
   }
 
