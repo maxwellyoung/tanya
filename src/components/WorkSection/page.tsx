@@ -14,8 +14,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { X, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
-import MagneticButton from "@/components/MagneticButton";
+import { X, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import RevealOnScroll from "@/components/RevealOnScroll";
 
 const projects = [
@@ -31,7 +30,6 @@ const projects = [
     description: "Modern living room design with a focus on comfort and style.",
     details:
       "This project transformed a dated living space into a contemporary haven. We focused on creating a harmonious blend of comfort and style, incorporating a neutral color palette with pops of muted tones. The design features clean lines, plush textures, and statement lighting to create a welcoming atmosphere that's perfect for both relaxation and entertaining.",
-    color: "#FF3333",
     year: "2024",
   },
   {
@@ -46,7 +44,6 @@ const projects = [
     description: "Colour palette consultation for a vibrant and cohesive home.",
     details:
       "For this color consultation project, we worked closely with the homeowners to develop a vibrant yet harmonious color scheme that reflects their personality and enhances their living space. The palette incorporates a mix of bold and subtle hues, carefully balanced to create a cohesive flow throughout the home. We considered natural light, existing furnishings, and the desired atmosphere for each room to craft a truly personalized color story.",
-    color: "#33CCFF",
     year: "2024",
   },
   {
@@ -62,7 +59,6 @@ const projects = [
       "Visual merchandising for Citta Design, a New Zealand homeware store.",
     details:
       "Our visual merchandising project for Citta Design aimed to create an immersive and inspiring shopping experience. We curated product displays that tell a cohesive story, highlighting the brand's unique aesthetic and quality craftsmanship. By strategically arranging products, implementing eye-catching focal points, and using creative props, we transformed the store into a space that not only showcases products effectively but also inspires customers with lifestyle vignettes.",
-    color: "#FFCC33",
     year: "2023",
   },
 ];
@@ -78,113 +74,50 @@ function ProjectCard({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-50px" });
-  const [isHovered, setIsHovered] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    setMousePosition({
-      x: (e.clientX - rect.left - rect.width / 2) * 0.1,
-      y: (e.clientY - rect.top - rect.height / 2) * 0.1,
-    });
-  };
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 50 }}
+      initial={{ opacity: 0, y: 40 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.8, delay: index * 0.15, ease: [0.215, 0.61, 0.355, 1] }}
-      className="group relative"
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        setMousePosition({ x: 0, y: 0 });
-      }}
+      transition={{ duration: 0.7, delay: index * 0.15, ease: [0.215, 0.61, 0.355, 1] }}
+      className="group cursor-pointer"
+      onClick={onClick}
     >
-      <motion.div
-        className="relative overflow-hidden rounded-2xl cursor-pointer bg-white shadow-lg"
-        animate={{
-          x: mousePosition.x,
-          y: mousePosition.y,
-          rotateX: -mousePosition.y * 0.5,
-          rotateY: mousePosition.x * 0.5,
-        }}
-        transition={{ type: "spring", stiffness: 150, damping: 15 }}
-        onClick={onClick}
-        style={{ transformStyle: "preserve-3d", perspective: 1000 }}
-        data-cursor-text="View"
-      >
-        {/* Image container */}
-        <div className="relative aspect-[4/3] overflow-hidden">
-          <motion.img
-            src={project.images[0]}
-            alt={project.alt}
-            className="w-full h-full object-cover"
-            animate={{ scale: isHovered ? 1.1 : 1 }}
-            transition={{ duration: 0.6, ease: [0.215, 0.61, 0.355, 1] }}
-          />
-
-          {/* Overlay gradient */}
-          <motion.div
-            className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0 to-black/0"
-            animate={{ opacity: isHovered ? 1 : 0.5 }}
-            transition={{ duration: 0.3 }}
-          />
-
-          {/* Badge */}
-          <motion.span
-            className="absolute top-4 left-4 px-3 py-1.5 text-xs font-medium text-white rounded-full backdrop-blur-sm"
-            style={{ backgroundColor: `${project.color}CC` }}
-            animate={{ y: isHovered ? 0 : -10, opacity: isHovered ? 1 : 0.8 }}
-            transition={{ duration: 0.3 }}
-          >
-            {project.badge}
-          </motion.span>
-
-          {/* Year */}
-          <span className="absolute top-4 right-4 text-xs text-white/60">
-            {project.year}
-          </span>
-
-          {/* View button */}
-          <motion.div
-            className="absolute bottom-4 right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center"
-            animate={{
-              scale: isHovered ? 1 : 0.8,
-              opacity: isHovered ? 1 : 0,
-            }}
-            transition={{ duration: 0.3 }}
-          >
-            <ArrowUpRight className="w-5 h-5 text-[#333333]" />
-          </motion.div>
-        </div>
-
-        {/* Content */}
-        <div className="p-6">
-          <motion.h3
-            className="text-xl font-medium text-[#333333] mb-2"
-            animate={{ x: isHovered ? 5 : 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {project.title}
-          </motion.h3>
-          <p className="text-sm text-[#666666] font-light line-clamp-2">
-            {project.description}
-          </p>
-        </div>
-
-        {/* Bottom accent line */}
-        <motion.div
-          className="absolute bottom-0 left-0 h-1 rounded-b-2xl"
-          style={{ backgroundColor: project.color }}
-          initial={{ width: "0%" }}
-          animate={{ width: isHovered ? "100%" : "0%" }}
-          transition={{ duration: 0.4, ease: [0.215, 0.61, 0.355, 1] }}
+      {/* Image container */}
+      <div className="relative aspect-[4/3] mb-5 md:mb-6 overflow-hidden rounded-lg md:rounded-xl">
+        <motion.img
+          src={project.images[0]}
+          alt={project.alt}
+          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
-      </motion.div>
+
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
+
+        {/* Badge */}
+        <span className="absolute top-4 left-4 px-3 py-1.5 text-xs font-medium text-white bg-[#333333]/80 backdrop-blur-sm rounded-full">
+          {project.badge}
+        </span>
+
+        {/* View indicator */}
+        <div className="absolute bottom-4 right-4 w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
+          <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-[#333333]" />
+        </div>
+      </div>
+
+      {/* Content */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg md:text-xl font-light text-[#333333] group-hover:text-[#FF3333] transition-colors duration-300">
+            {project.title}
+          </h3>
+          <span className="text-xs text-[#999999]">{project.year}</span>
+        </div>
+        <p className="text-sm text-[#666666] font-light line-clamp-2">
+          {project.description}
+        </p>
+      </div>
     </motion.div>
   );
 }
@@ -204,30 +137,30 @@ export default function WorkSection() {
     <div className="w-full max-w-6xl mx-auto">
       {/* Section Header */}
       <RevealOnScroll>
-        <div className="mb-16 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-          <div>
-            <motion.span
-              className="text-sm uppercase tracking-[0.3em] text-[#FF3333] font-medium mb-4 block"
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-            >
-              Selected Work
-            </motion.span>
-            <h2 className="text-5xl md:text-7xl font-light text-[#333333] leading-[1.1]">
-              Projects that{" "}
-              <span className="italic font-medium text-[#FF3333]">shine</span>
+        <div className="mb-12 md:mb-20">
+          <motion.p
+            className="text-xs md:text-sm uppercase tracking-[0.3em] text-[#999999] mb-4 md:mb-6"
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            Selected Work
+          </motion.p>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 md:gap-8">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-light text-[#333333] leading-tight">
+              Projects that<br className="hidden md:block" />{" "}
+              <span className="italic text-[#666666]">tell stories</span>
             </h2>
+            <p className="text-base md:text-lg text-[#666666] font-light max-w-sm">
+              A curated selection of interior transformations and colour consultations
+            </p>
           </div>
-          <p className="text-lg text-[#666666] font-light max-w-md">
-            A curated selection of interior transformations and colour consultations
-          </p>
         </div>
       </RevealOnScroll>
 
       {/* Projects Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
         {projects.map((project, index) => (
           <ProjectCard
             key={index}
@@ -242,7 +175,7 @@ export default function WorkSection() {
       <Dialog open={open} onOpenChange={setOpen}>
         <AnimatePresence>
           {selectedProject && (
-            <DialogContent className="max-w-5xl mx-auto p-0 bg-white overflow-hidden rounded-2xl border-0">
+            <DialogContent className="max-w-5xl mx-auto p-0 bg-white overflow-hidden rounded-xl md:rounded-2xl border-0">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -250,7 +183,7 @@ export default function WorkSection() {
                 className="flex flex-col md:flex-row h-full max-h-[90vh]"
               >
                 {/* Image Carousel */}
-                <div className="md:w-3/5 relative bg-[#333333]">
+                <div className="md:w-3/5 relative bg-[#f5f5f5]">
                   <Carousel className="w-full h-full">
                     <CarouselContent className="h-full">
                       {selectedProject.images.map((src, idx) => (
@@ -274,7 +207,7 @@ export default function WorkSection() {
                   </Carousel>
 
                   {/* Image counter */}
-                  <div className="absolute bottom-4 left-4 px-3 py-1.5 bg-black/50 backdrop-blur-sm rounded-full">
+                  <div className="absolute bottom-4 left-4 px-3 py-1.5 bg-black/40 backdrop-blur-sm rounded-full">
                     <span className="text-xs text-white">
                       {selectedProject.images.length} images
                     </span>
@@ -282,35 +215,32 @@ export default function WorkSection() {
                 </div>
 
                 {/* Content */}
-                <div className="md:w-2/5 p-8 md:p-10 overflow-y-auto">
+                <div className="md:w-2/5 p-6 md:p-10 overflow-y-auto">
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <span
-                      className="inline-block px-3 py-1 text-xs font-medium text-white rounded-full mb-4"
-                      style={{ backgroundColor: selectedProject.color }}
-                    >
+                    <span className="inline-block px-3 py-1 text-xs font-medium text-[#333333] bg-[#f5f5f5] rounded-full mb-4">
                       {selectedProject.badge}
                     </span>
 
-                    <h3 className="text-3xl md:text-4xl font-light text-[#333333] mb-4">
+                    <h3 className="text-2xl md:text-3xl font-light text-[#333333] mb-4">
                       {selectedProject.title}
                     </h3>
 
-                    <p className="text-lg text-[#666666] font-light mb-6 leading-relaxed">
+                    <p className="text-base md:text-lg text-[#666666] font-light mb-6 leading-relaxed">
                       {selectedProject.description}
                     </p>
 
                     <div className="w-12 h-px bg-[#333333]/20 mb-6" />
 
-                    <p className="text-[#666666] leading-relaxed">
+                    <p className="text-sm md:text-base text-[#666666] leading-relaxed font-light">
                       {selectedProject.details}
                     </p>
 
                     <div className="mt-8 pt-6 border-t border-[#333333]/10">
-                      <span className="text-xs text-[#666666] uppercase tracking-wider">
+                      <span className="text-xs text-[#999999] uppercase tracking-wider">
                         Year: {selectedProject.year}
                       </span>
                     </div>
@@ -318,7 +248,7 @@ export default function WorkSection() {
                 </div>
               </motion.div>
 
-              <DialogClose className="absolute right-4 top-4 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-[#FFF5F5] transition-colors">
+              <DialogClose className="absolute right-4 top-4 z-10 w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-[#f5f5f5] transition-colors">
                 <X className="h-4 w-4 text-[#333333]" />
                 <span className="sr-only">Close</span>
               </DialogClose>
@@ -327,18 +257,16 @@ export default function WorkSection() {
         </AnimatePresence>
       </Dialog>
 
-      {/* View All CTA */}
+      {/* CTA */}
       <RevealOnScroll delay={0.3}>
-        <div className="mt-16 text-center">
-          <MagneticButton strength={0.2}>
-            <button
-              className="group inline-flex items-center gap-3 px-8 py-4 bg-[#333333] text-white rounded-full font-medium hover:bg-[#FF3333] transition-colors duration-300"
-              data-cursor-hover
-            >
-              <span>View All Projects</span>
-              <ArrowUpRight className="w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-            </button>
-          </MagneticButton>
+        <div className="mt-12 md:mt-20 text-center">
+          <a
+            href="#contact"
+            className="inline-flex items-center gap-2 text-[#333333] hover:text-[#FF3333] transition-colors duration-300 group"
+          >
+            <span className="text-base md:text-lg font-light">Interested in working together?</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </a>
         </div>
       </RevealOnScroll>
     </div>
