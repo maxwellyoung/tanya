@@ -83,7 +83,7 @@ export default function AboutSection() {
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
             >
-              Auckland, New Zealand
+              Wellington, New Zealand
             </motion.p>
           </motion.div>
         </RevealOnScroll>

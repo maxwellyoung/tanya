@@ -119,7 +119,7 @@ export default function ContactForm() {
                   <p className="text-xs text-[#999999] uppercase tracking-wider mb-1">
                     Location
                   </p>
-                  <p className="text-[#333333]">Auckland, New Zealand</p>
+                  <p className="text-[#333333]">Wellington, New Zealand</p>
                 </div>
               </div>
             </div>
