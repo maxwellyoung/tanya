@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import {
   Dialog,
   DialogContent,
@@ -86,10 +87,12 @@ function ProjectCard({
     >
       {/* Image container */}
       <div className="relative aspect-[4/3] mb-5 md:mb-6 overflow-hidden rounded-lg md:rounded-xl">
-        <motion.img
+        <Image
           src={project.images[0]}
           alt={project.alt}
-          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          fill
+          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
 
         {/* Hover overlay */}
@@ -189,10 +192,12 @@ export default function WorkSection() {
                       {selectedProject.images.map((src, idx) => (
                         <CarouselItem key={idx} className="h-full">
                           <div className="relative h-64 md:h-full min-h-[300px]">
-                            <img
+                            <Image
                               src={src}
                               alt={`${selectedProject.alt} ${idx + 1}`}
-                              className="w-full h-full object-cover"
+                              fill
+                              className="object-cover"
+                              sizes="60vw"
                             />
                           </div>
                         </CarouselItem>

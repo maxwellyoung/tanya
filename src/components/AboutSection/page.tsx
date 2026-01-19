@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import RevealOnScroll from "@/components/RevealOnScroll";
 
@@ -62,10 +63,12 @@ export default function AboutSection() {
           >
             {/* Main image container */}
             <div className="relative aspect-[3/4] rounded-xl md:rounded-2xl overflow-hidden">
-              <img
+              <Image
                 src="/profile.webp"
                 alt="Tanya Bardell-Young"
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
               />
 
               {/* Subtle gradient overlay */}
